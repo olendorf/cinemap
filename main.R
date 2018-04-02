@@ -167,7 +167,11 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
 }
 end_time <- Sys.time()
 
+
+
 print(end_time - start_time)
+
+write.csv(cinemap_brief, file = "data/cinemap.csv")
 
 #regmatches(string, regexpr(pattern, string)) 
 
