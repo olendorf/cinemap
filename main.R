@@ -59,24 +59,28 @@ movie_data <- function(title, year){
 
 start_time <- Sys.time()
 last_title <- ""
+working_title <- ""
 repeated_title = FALSE
 for(i in 1:length(cinemap_brief$film_title_en)) {
   if(cinemap_brief[i,]$film_title_en != last_title) {
     repeated_title = FALSE
     last_title <- cinemap_brief[i,]$film_title_en  # Don't send requests for duplicate titles
-    print(paste("Working on ", last_title))
+    working_title <- last_title
     
     # Work through the various titles to get a hit.
     result <- movie_data(cinemap_brief[i,]$film_title_en, cinemap_brief[i,]$year_released)
     Sys.sleep(sleep_time)
     if(result$total_results != 1) {
       result <- movie_data(cinemap_brief[i,]$film_title_romanji, cinemap_brief[i,]$year_released)
+      working_title <- cinemap_brief[i,]$film_title_romanji
       Sys.sleep(sleep_time)
     }
     if(result$total_results != 1) {
       result <- movie_data(cinemap_brief[i,]$film_title_original, cinemap_brief[i,]$year_released)
+      working_title <- cinemap_brief[i,]$film_title_original
       Sys.sleep(sleep_time)
     }
+    print(paste("Working on ", working_title))
   }
   else {
     repeated_title = TRUE
