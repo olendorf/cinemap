@@ -87,16 +87,16 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
     # Get the info returned in the basic query
     cinemap_brief[i,]$tmdb_id <- result$results$id
     if(cinemap_brief[i,]$film_title_original == "") {
-      cinemap_brief[,]$film_title_original = result$results$original_title
+      cinemap_brief[i,]$film_title_original = result$results$original_title
     }
     if(cinemap_brief[i,]$year_released == "") {
-      cinemap_brief[,]$year_released = regmatches(result$results$release_date, regexpr("[0-9]{4}", result$results$release_date))
+      cinemap_brief[i,]$year_released = regmatches(result$results$release_date, regexpr("[0-9]{4}", result$results$release_date))
     }
     if(cinemap_brief[i,]$release_date == "") {
-      cinemap_brief[,]$release_date = result$results$release_date
+      cinemap_brief[i,]$release_date = result$results$release_date
     }
     if(cinemap_brief[i,]$tmdb_poster_url == "") {
-      cinemap_brief[,]$tmdb_poster_url = result$results$poster_path
+      cinemap_brief[i,]$tmdb_poster_url = result$results$poster_path
     }
     
     # Get the movie details provided if it hasn't been retrieved already
@@ -105,22 +105,22 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
       Sys.sleep(sleep_time)
     }
     if(cinemap_brief[i,]$genres == "") {
-      cinemap_brief[,]$genres = paste(details$genres$name, collapse = "; ")
+      cinemap_brief[i,]$genres = paste(details$genres$name, collapse = "; ")
     }
     if(cinemap_brief[i,]$spoken_languages == "") {
-      cinemap_brief[,]$spoken_languages = paste(details$spoken_languages$iso_639_1, collapse = "; ")
+      cinemap_brief[i,]$spoken_languages = paste(details$spoken_languages$iso_639_1, collapse = "; ")
     }
     if(cinemap_brief[i,]$production_studio == "") {
-      cinemap_brief[,]$production_studio = paste(details$production_companies$name, collapse = "; ")
+      cinemap_brief[i,]$production_studio = paste(details$production_companies$name, collapse = "; ")
     }
     if(cinemap_brief[i,]$country_of_production == "") {
-      cinemap_brief[,]$country_of_production = paste(details$production_countries$iso_3166_1, collapse = "; ")
+      cinemap_brief[i,]$country_of_production = paste(details$production_countries$iso_3166_1, collapse = "; ")
     }
     if(cinemap_brief[i,]$imdb_id == "") {
-      cinemap_brief[,]$imdb_id = details$imdb_id
+      cinemap_brief[i,]$imdb_id = details$imdb_id
     }
     if(cinemap_brief[i,]$budget == "") {
-      cinemap_brief[,]$budget = details$budget
+      cinemap_brief[i,]$budget = details$budget
     }
     
     
@@ -130,16 +130,16 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
       alt_titles <- movie_alternative_title(api_key = api_key_v3, id = result$results$id)
       Sys.sleep(sleep_time)
     }
-    if(cinemap_brief[1,]$film_title_romanji == "" || cinemap_brief[1,]$film_title_original == "")
+    if(cinemap_brief[i,]$film_title_romanji == "" || cinemap_brief[i,]$film_title_original == "")
     {
       # alt_titles <- movie_alternative_title(api_key = api_key_v3, id = result$results$id)
       # Sys.sleep(sleep_time)
       alt_titles <- alt_titles$titles$title[alt_titles$titles$iso_3166_1 == "JP"]
       if(cinemap_brief[i,]$film_title_romanji == "") {
-        cinemap_brief[,]$film_title_romanji = alt_titles[!grepl(japanese_char_regex, alt_titles)]
+        cinemap_brief[i,]$film_title_romanji = alt_titles[!grepl(japanese_char_regex, alt_titles)]
       }
       if(cinemap_brief[i,]$film_title_original == "") {
-        cinemap_brief[,]$film_title_original = alt_titles[grepl(japanese_char_regex, alt_titles)]
+        cinemap_brief[i,]$film_title_original = alt_titles[grepl(japanese_char_regex, alt_titles)]
       }
     }
     
