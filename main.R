@@ -56,6 +56,14 @@ movie_data <- function(title, year){
   return(query_result)
 }
 
+toJSON2 <- function(data) {
+  if(length(data) == 0) {
+    return("")
+  } else {
+    return(toJSON(data))
+  }
+}
+
 
 start_time <- Sys.time()
 last_title <- ""
@@ -109,16 +117,16 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
       Sys.sleep(sleep_time)
     }
     if(cinemap_brief[i,]$genres == "") {
-      cinemap_brief[i,]$genres = paste(details$genres$name, collapse = "; ")
+      cinemap_brief[i,]$genres = toJSON2(details$genres$name)
     }
     if(cinemap_brief[i,]$spoken_languages == "") {
-      cinemap_brief[i,]$spoken_languages = paste(details$spoken_languages$iso_639_1, collapse = "; ")
+      cinemap_brief[i,]$spoken_languages = toJSON2(details$spoken_languages$iso_639_1)
     }
     if(cinemap_brief[i,]$production_studio == "") {
-      cinemap_brief[i,]$production_studio = paste(details$production_companies$name, collapse = "; ")
+      cinemap_brief[i,]$production_studio = toJSON2(details$production_companies$name)
     }
     if(cinemap_brief[i,]$country_of_production == "") {
-      cinemap_brief[i,]$country_of_production = paste(details$production_countries$iso_3166_1, collapse = "; ")
+      cinemap_brief[i,]$country_of_production = toJSON2(details$production_countries$iso_3166_1)
     }
     if(cinemap_brief[i,]$imdb_id == "") {
       cinemap_brief[i,]$imdb_id = details$imdb_id
@@ -155,16 +163,16 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
     }
 
     if(cinemap_brief[i,]$tmdb_cast == "") {
-      cinemap_brief[i,]$tmdb_cast <- toJSON(cast_and_crew$cast)
+      cinemap_brief[i,]$tmdb_cast <- toJSON2(cast_and_crew$cast)
     }
     if(cinemap_brief[i,]$director == "") {
-      cinemap_brief[i,]$director <- paste(cast_and_crew$crew[ which(cast_and_crew$crew$job == "Director"),]$name, collapse =  "; ")
+      cinemap_brief[i,]$director <- toJSON2(cast_and_crew$crew[ which(cast_and_crew$crew$job == "Director"),]$name)
     }
     if(cinemap_brief[i,]$producer == "") {
-      cinemap_brief[i,]$producer <- paste(cast_and_crew$crew[ which(cast_and_crew$crew$job == "Producer"),]$name, collapse =  "; ")
+      cinemap_brief[i,]$producer <- toJSON2(cast_and_crew$crew[ which(cast_and_crew$crew$job == "Producer"),]$name)
     }
     if(cinemap_brief[i,]$tmdb_crew == "") {
-      cinemap_brief[i,]$tmdb_crew <- toJSON(cast_and_crew$crew)
+      cinemap_brief[i,]$tmdb_crew <- toJSON2(cast_and_crew$crew)
     }
     
   }
