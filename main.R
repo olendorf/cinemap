@@ -17,7 +17,7 @@ install_packages <- function(packages) {
   }
 }
 
-install_packages(c("rvest", "TMDb"))
+install_packages(c("rvest", "TMDb", "countrycode"))
 
 api_key_v3 <- '90baee00115159ddf9966b23a1d51062'
 
@@ -36,6 +36,22 @@ cinemap_brief <- master_data[1:50,]  # This is for development. Remove and subst
 cinemap_brief[cinemap_brief$release_date == "--",]$release_date = ""
 cinemap_brief[cinemap_brief$production_studio == "--",]$production_studio = ""
 cinemap_brief$production_studio <- gsub("/", "; ", cinemap_brief$production_studio)
+
+# Data, multivalue data converted to JSON
+# 
+for(i in 1:length(cinemap_brief$film_title_en)) {
+  # Normalize produciton studios
+  if(cinemap_brief[i,]$production_studio != "") {
+    cinemap_brief[i,]$production_studio <- toJSON(unlist(strsplit(cinemap_brief[i,]$production_studio, c(";", "; "))))
+  } 
+  
+  # Normalize country codes to ISO 3166-1 2-alpha standard.
+  if(cinemap_brief[i,]$country_of_production != "") {
+    out <- unlist(strsplit(cinemap_brief[i,]$country_of_production, "/"))
+    out <- toJSON(countrycode(out, "country.name", "iso2c"))
+    cinemap_brief[i,]$country_of_production <- out
+  }
+}
 
 # Initialize new columns with default values
 cinemap_brief$tmdb_id <- ""
