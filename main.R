@@ -13,7 +13,8 @@ sleep_time <- 0.5
 
 japanese_char_regex <-  "[\u3000-\u303F]|[\u3040-\u309F]|[\u30A0-\u30FF]|[\uFF00-\uFFEF]|[\u4E00-\u9FAF]|[\u2605-\u2606]|[\u2190-\u2195]|\u203B/g"
 
-cinemap_brief <- master_data[1:50,]  # This is for development. Remove and substitute master_data later
+# cinemap_brief <- master_data[1:50,]  # This is for development. Remove and substitute master_data later
+cinemap_brief <- master_data
 
 # Do some cleanup
 cinemap_brief[cinemap_brief$release_date == "--",]$release_date = ""
@@ -186,88 +187,89 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
   }
 }
 
-# #main > div > div.findSection > table > tbody > tr:nth-child(1) > td.result_text > a
-
-i = 9
-
-# Build the search URL
-base_url <- "https://www.imdb.com" 
-movie_path <- ""
-# If we already know the IMDb ID then just use that
-if(cinemap_brief[i,]$imdb_id == "" || is.na(cinemap_brief[i,]$imdb_id)) {
-  query_path <- "/find?ref_=nv_sr_fn&q="
-  url <- URLencode(paste(c(base_url, query_path, cinemap_brief[i, ]$film_title_en, "+", cinemap_brief[i, ]$year_released, "&s=all"), collapse = ""))
-  
-  # Do the search
-  search_results <- read_html(url)
-  Sys.sleep(sleep_time)
-  
-  # Build the pattern to catch the title. Seems IMDb will return titles in various
-  # languages so using a simple regex OR to test all the titles.
-  pattern_titles <- c()
-  
-  # Only include titles we have
-  if(cinemap_brief[i,]$film_title_en != "" && !is.na(cinemap_brief[i,]$film_title_en))
-    pattern_titles <- c(pattern_titles, cinemap_brief[i,]$film_title_en)
-  if(cinemap_brief[i,]$film_title_romanji != "" && !is.na(cinemap_brief[i,]$film_title_romanji))
-    pattern_titles <- c(pattern_titles, cinemap_brief[i,]$film_title_romanji)
-  if(cinemap_brief[i,]$film_title_original != "" && !is.na(cinemap_brief[i,]$film_title_original))
-    pattern_titles <- c(pattern_titles, cinemap_brief[i,]$film_title_original)
-  
-  pattern <- paste(pattern_titles, collapse = "|")
-  pattern <- paste(c("(", pattern, ") *\\(", cinemap_brief[i,]$year_released, "\\)"), collapse = "")
-  
-  
-  # Get the titles and years
-  title_nodes <- html_text(html_nodes(search_results, ".findSection td.result_text"))
-  # See if there are any exact matches, we want one and only one match
-  matches <- grep(pattern, title_nodes)
-  if(length(matches) == 1){
-    # get the path to the movies splash page
-    movie_path <- trimws(html_attr(html_nodes(search_results, ".findSection td.result_text a")[[matches]], "href"))
-    cinemap_brief[i,]$imdb_id <- strsplit(movie_path, "/")[[1]][3]
-  }
-} else {
-  movie_path <- paste("/title/", cinemap_brief[i,]$imdb_id,  "/?ref_=fn_al_tt_1", sep = "")
-}
-movie_url <- paste(base_url, movie_path, sep = "")
-# Load the movie page
-movie_url
-movie_page <- tryCatch(read_html(movie_url), error = function(e) {e$message})
-Sys.sleep(sleep_time)
-
-# Rvest returns a list, but the tryCatch statement will return a character string
-# if an error is thrown. This test checks for errors and logs basic info.
-if(typeof(movie_page) != "list")
-{
-  cinemap_brief[i,]$imdb_error <- movie_page
-} else {
-  cinemap_brief[i,]$imdb_error <- ""
-  cinemap_brief[i,]$imdb_scraped <- TRUE
-  
-  # Rather than test if genre's exist, add any new genres. This does have the 
-  # side-effect of adding Science Fiction (TMDb) and Sci-Fi (IMDb). Not sure
-  # if that is good or bad
-  new_genre <- html_text(html_nodes(movie_page, "span[itemprop='genre']"))
-  current_genre <- fromJSON(cinemap_brief[i,]$genres)
-  cinemap_brief[i,]$genres <- toJSON2(c(current_genre, setdiff(new_genre, current_genre)))
-  
-  if(cinemap_brief[i,]$spoken_languages == "") {
-    languages <- html_text(html_nodes(html_nodes(movie_page, '#titleDetails .txt-block')[3], 'a'))
-    if(length(languages) > 0) {
-      cinemap_brief[i,]$spoken_languages <- toJSON2(language_to_code_2(languages))
-    }
-  }
-  
-  if(cinemap_brief[i,]$year_released == "") {
-    year <- html_text(html_node(movie_page, '#titleYear'))
-    if(!is.na(year)) {
-      cinemap_brief[i,]$year_released <- regmatches(year, regexpr("[0-9]{4}", year))
-    }
-  }
-  
-}
-movie_page
+#  Commenting out the IMDb stuff until its done.
+# # #main > div > div.findSection > table > tbody > tr:nth-child(1) > td.result_text > a
+# 
+# i = 9
+# 
+# # Build the search URL
+# base_url <- "https://www.imdb.com" 
+# movie_path <- ""
+# # If we already know the IMDb ID then just use that
+# if(cinemap_brief[i,]$imdb_id == "" || is.na(cinemap_brief[i,]$imdb_id)) {
+#   query_path <- "/find?ref_=nv_sr_fn&q="
+#   url <- URLencode(paste(c(base_url, query_path, cinemap_brief[i, ]$film_title_en, "+", cinemap_brief[i, ]$year_released, "&s=all"), collapse = ""))
+#   
+#   # Do the search
+#   search_results <- read_html(url)
+#   Sys.sleep(sleep_time)
+#   
+#   # Build the pattern to catch the title. Seems IMDb will return titles in various
+#   # languages so using a simple regex OR to test all the titles.
+#   pattern_titles <- c()
+#   
+#   # Only include titles we have
+#   if(cinemap_brief[i,]$film_title_en != "" && !is.na(cinemap_brief[i,]$film_title_en))
+#     pattern_titles <- c(pattern_titles, cinemap_brief[i,]$film_title_en)
+#   if(cinemap_brief[i,]$film_title_romanji != "" && !is.na(cinemap_brief[i,]$film_title_romanji))
+#     pattern_titles <- c(pattern_titles, cinemap_brief[i,]$film_title_romanji)
+#   if(cinemap_brief[i,]$film_title_original != "" && !is.na(cinemap_brief[i,]$film_title_original))
+#     pattern_titles <- c(pattern_titles, cinemap_brief[i,]$film_title_original)
+#   
+#   pattern <- paste(pattern_titles, collapse = "|")
+#   pattern <- paste(c("(", pattern, ") *\\(", cinemap_brief[i,]$year_released, "\\)"), collapse = "")
+#   
+#   
+#   # Get the titles and years
+#   title_nodes <- html_text(html_nodes(search_results, ".findSection td.result_text"))
+#   # See if there are any exact matches, we want one and only one match
+#   matches <- grep(pattern, title_nodes)
+#   if(length(matches) == 1){
+#     # get the path to the movies splash page
+#     movie_path <- trimws(html_attr(html_nodes(search_results, ".findSection td.result_text a")[[matches]], "href"))
+#     cinemap_brief[i,]$imdb_id <- strsplit(movie_path, "/")[[1]][3]
+#   }
+# } else {
+#   movie_path <- paste("/title/", cinemap_brief[i,]$imdb_id,  "/?ref_=fn_al_tt_1", sep = "")
+# }
+# movie_url <- paste(base_url, movie_path, sep = "")
+# # Load the movie page
+# movie_url
+# movie_page <- tryCatch(read_html(movie_url), error = function(e) {e$message})
+# Sys.sleep(sleep_time)
+# 
+# # Rvest returns a list, but the tryCatch statement will return a character string
+# # if an error is thrown. This test checks for errors and logs basic info.
+# if(typeof(movie_page) != "list")
+# {
+#   cinemap_brief[i,]$imdb_error <- movie_page
+# } else {
+#   cinemap_brief[i,]$imdb_error <- ""
+#   cinemap_brief[i,]$imdb_scraped <- TRUE
+#   
+#   # Rather than test if genre's exist, add any new genres. This does have the 
+#   # side-effect of adding Science Fiction (TMDb) and Sci-Fi (IMDb). Not sure
+#   # if that is good or bad
+#   new_genre <- html_text(html_nodes(movie_page, "span[itemprop='genre']"))
+#   current_genre <- fromJSON(cinemap_brief[i,]$genres)
+#   cinemap_brief[i,]$genres <- toJSON2(c(current_genre, setdiff(new_genre, current_genre)))
+#   
+#   if(cinemap_brief[i,]$spoken_languages == "") {
+#     languages <- html_text(html_nodes(html_nodes(movie_page, '#titleDetails .txt-block')[3], 'a'))
+#     if(length(languages) > 0) {
+#       cinemap_brief[i,]$spoken_languages <- toJSON2(language_to_code_2(languages))
+#     }
+#   }
+#   
+#   if(cinemap_brief[i,]$year_released == "") {
+#     year <- html_text(html_node(movie_page, '#titleYear'))
+#     if(!is.na(year)) {
+#       cinemap_brief[i,]$year_released <- regmatches(year, regexpr("[0-9]{4}", year))
+#     }
+#   }
+#   
+# }
+# movie_page
 
 
 
