@@ -13,8 +13,8 @@ sleep_time <- 0.5
 
 japanese_char_regex <-  "[\u3000-\u303F]|[\u3040-\u309F]|[\u30A0-\u30FF]|[\uFF00-\uFFEF]|[\u4E00-\u9FAF]|[\u2605-\u2606]|[\u2190-\u2195]|\u203B/g"
 
-# cinemap_brief <- master_data[1:50,]  # This is for development. Remove and substitute master_data later
-cinemap_brief <- master_data
+cinemap_brief <- master_data[1:50,]  # This is for development. Remove and substitute master_data later
+# cinemap_brief <- master_data
 
 # Do some cleanup
 cinemap_brief[cinemap_brief$release_date == "--",]$release_date = ""
