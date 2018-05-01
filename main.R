@@ -1,10 +1,30 @@
 
+###################
+## Automate package install and load
 
+is_installed <- function(package_name) is.element(package_name, installed.packages()[,1])
+
+# If a package is not installed, install it. Then load the package.
+install_and_load <- function(package_name) {
+  if(!is_installed(package_name)) {
+    install.packages(package_name)
+  }
+  library(package_name, character.only = TRUE)
+}
+
+install_packages <- function(packages) {
+  for(package in packages) {
+    install_and_load(package)
+  }
+}
+
+install_packages(c("rvest", "TMDb", "countrycode"))
  
 
 api_key_v3 <- '90baee00115159ddf9966b23a1d51062'
 
-master_data <- read.csv('data/master_data.csv', header = TRUE, stringsAsFactors=FALSE)
+# master_data <- read.csv('data/master_data.csv', header = TRUE, stringsAsFactors=FALSE)
+master_data <- read.csv('data/master_data_utf8.csv', header = TRUE, stringsAsFactors=FALSE)
 
 # If you get HTTP error 429 you are making too many requests too quickly. Increasing
 # the sleep time will fix that once its high enough at the cost of taking longer to
