@@ -23,8 +23,8 @@ install_packages(c("rvest", "TMDb", "countrycode"))
 
 api_key_v3 <- '90baee00115159ddf9966b23a1d51062'
 
-# master_data <- read.csv('data/master_data.csv', header = TRUE, stringsAsFactors=FALSE)
-master_data <- read.csv('data/master_data_utf8.csv', header = TRUE, stringsAsFactors=FALSE)
+master_data <- read.csv('data/master_data.csv', header = TRUE, stringsAsFactors=FALSE)
+# master_data <- read.csv('data/master_data_utf8.csv', header = TRUE, stringsAsFactors=FALSE)
 
 # If you get HTTP error 429 you are making too many requests too quickly. Increasing
 # the sleep time will fix that once its high enough at the cost of taking longer to
@@ -106,16 +106,16 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
     # Work through the various titles to get a hit.
     result <- movie_data(cinemap_brief[i,]$film_title_en, cinemap_brief[i,]$year_released)
     Sys.sleep(sleep_time)
-    if(result$total_results != 1) {
-      result <- movie_data(cinemap_brief[i,]$film_title_romanji, cinemap_brief[i,]$year_released)
-      working_title <- cinemap_brief[i,]$film_title_romanji
-      Sys.sleep(sleep_time)
-    }
-    if(result$total_results != 1) {
-      result <- movie_data(cinemap_brief[i,]$film_title_original, cinemap_brief[i,]$year_released)
-      working_title <- cinemap_brief[i,]$film_title_original
-      Sys.sleep(sleep_time)
-    }
+    # if(result$total_results != 1) {
+    #   result <- movie_data(cinemap_brief[i,]$film_title_romanji, cinemap_brief[i,]$year_released)
+    #   working_title <- cinemap_brief[i,]$film_title_romanji
+    #   Sys.sleep(sleep_time)
+    # }
+    # if(result$total_results != 1) {
+    #   result <- movie_data(cinemap_brief[i,]$film_title_original, cinemap_brief[i,]$year_released)
+    #   working_title <- cinemap_brief[i,]$film_title_original
+    #   Sys.sleep(sleep_time)
+    # }
     print(paste("Working on ", working_title))
   }
   else {
