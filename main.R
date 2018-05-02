@@ -29,7 +29,7 @@ master_data <- read.csv('data/master_data.csv', header = TRUE, stringsAsFactors=
 # If you get HTTP error 429 you are making too many requests too quickly. Increasing
 # the sleep time will fix that once its high enough at the cost of taking longer to
 # retrieve the data.
-sleep_time <- 0.5
+sleep_time <- 0.75
 
 japanese_char_regex <-  "[\u3000-\u303F]|[\u3040-\u309F]|[\u30A0-\u30FF]|[\uFF00-\uFFEF]|[\u4E00-\u9FAF]|[\u2605-\u2606]|[\u2190-\u2195]|\u203B/g"
 
@@ -138,36 +138,52 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
         cinemap_brief[i,]$year_released = regmatches(result$results$release_date, regexpr("[0-9]{4}", result$results$release_date))
       }
     )
-    if(cinemap_brief[i,]$release_date == "") {
-      cinemap_brief[i,]$release_date = result$results$release_date
-    }
-    if(cinemap_brief[i,]$tmdb_poster_url == "") {
-      cinemap_brief[i,]$tmdb_poster_url = result$results$poster_path
-    }
+    try(
+      if(cinemap_brief[i,]$release_date == "") {
+        cinemap_brief[i,]$release_date = result$results$release_date
+      }
+    )
+    try(
+      if(cinemap_brief[i,]$tmdb_poster_url == "") {
+        cinemap_brief[i,]$tmdb_poster_url = result$results$poster_path
+      }
+    )
     
     # Get the movie details provided if it hasn't been retrieved already
     if(!repeated_title) {
       details <- movie(api_key = api_key_v3, result$results$id)
       Sys.sleep(sleep_time)
     }
-    if(cinemap_brief[i,]$genres == "") {
-      cinemap_brief[i,]$genres = toJSON2(details$genres$name)
-    }
-    if(cinemap_brief[i,]$spoken_languages == "") {
-      cinemap_brief[i,]$spoken_languages = toJSON2(details$spoken_languages$iso_639_1)
-    }
-    if(cinemap_brief[i,]$production_studio == "") {
-      cinemap_brief[i,]$production_studio = toJSON2(details$production_companies$name)
-    }
-    if(cinemap_brief[i,]$country_of_production == "") {
-      cinemap_brief[i,]$country_of_production = toJSON2(details$production_countries$iso_3166_1)
-    }
-    if(cinemap_brief[i,]$imdb_id == "") {
-      cinemap_brief[i,]$imdb_id = details$imdb_id
-    }
-    if(cinemap_brief[i,]$budget == "" && details$budget > 0) {
-      cinemap_brief[i,]$budget = details$budget
-    }
+    try(
+      if(cinemap_brief[i,]$genres == "") {
+        cinemap_brief[i,]$genres = toJSON2(details$genres$name)
+      }
+    )
+    try(
+      if(cinemap_brief[i,]$spoken_languages == "") {
+        cinemap_brief[i,]$spoken_languages = toJSON2(details$spoken_languages$iso_639_1)
+      }
+    )
+    try(
+      if(cinemap_brief[i,]$production_studio == "") {
+        cinemap_brief[i,]$production_studio = toJSON2(details$production_companies$name)
+      }
+    )
+    try(
+      if(cinemap_brief[i,]$country_of_production == "") {
+        cinemap_brief[i,]$country_of_production = toJSON2(details$production_countries$iso_3166_1)
+      }
+    )
+    try(
+      if(cinemap_brief[i,]$imdb_id == "") {
+        cinemap_brief[i,]$imdb_id = details$imdb_id
+      }
+    )
+    try(
+      if(cinemap_brief[i,]$budget == "" && details$budget > 0) {
+        cinemap_brief[i,]$budget = details$budget
+      }
+    )
     
     
     # Get alt title info and update it if needed.
@@ -181,12 +197,16 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
       # alt_titles <- movie_alternative_title(api_key = api_key_v3, id = result$results$id)
       # Sys.sleep(sleep_time)
       alt_titles <- alt_titles$titles$title[alt_titles$titles$iso_3166_1 == "JP"]
-      if(cinemap_brief[i,]$film_title_romanji == "") {
-        cinemap_brief[i,]$film_title_romanji = alt_titles[!grepl(japanese_char_regex, alt_titles)]
-      }
-      if(cinemap_brief[i,]$film_title_original == "") {
-        cinemap_brief[i,]$film_title_original = alt_titles[grepl(japanese_char_regex, alt_titles)]
-      }
+      try(
+        if(cinemap_brief[i,]$film_title_romanji == "") {
+          cinemap_brief[i,]$film_title_romanji = alt_titles[!grepl(japanese_char_regex, alt_titles)]
+        }
+      )
+      try(
+        if(cinemap_brief[i,]$film_title_original == "") {
+          cinemap_brief[i,]$film_title_original = alt_titles[grepl(japanese_char_regex, alt_titles)]
+        }
+      )
     }
     
     # Get cast and crew
