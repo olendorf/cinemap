@@ -203,11 +203,11 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
         cinemap_brief[i,]$director <- toJSON2(cast_and_crew$crew[ which(cast_and_crew$crew$job == "Director"),]$name)
       }
     )
-    # try(
+    try(
       if(cinemap_brief[i,]$producer == "") {
         cinemap_brief[i,]$producer <- toJSON2(cast_and_crew$crew[ which(cast_and_crew$crew$job == "Producer"),]$name)
       }
-    # )
+    )
     try(
       if(cinemap_brief[i,]$tmdb_crew == "") {
         cinemap_brief[i,]$tmdb_crew <- toJSON2(cast_and_crew$crew)
