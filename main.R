@@ -23,7 +23,7 @@ install_packages(c("rvest", "TMDb", "countrycode"))
 
 api_key_v3 <- '90baee00115159ddf9966b23a1d51062'
 
-master_data <- read.csv('data/master_data.csv', header = TRUE, stringsAsFactors=FALSE)
+# master_data <- read.csv('data/master_data.csv', header = TRUE, stringsAsFactors=FALSE)
 # master_data <- read.csv('data/master_data_utf8.csv', header = TRUE, stringsAsFactors=FALSE)
 
 # If you get HTTP error 429 you are making too many requests too quickly. Increasing
@@ -33,13 +33,14 @@ sleep_time <- 0.5
 
 japanese_char_regex <-  "[\u3000-\u303F]|[\u3040-\u309F]|[\u30A0-\u30FF]|[\uFF00-\uFFEF]|[\u4E00-\u9FAF]|[\u2605-\u2606]|[\u2190-\u2195]|\u203B/g"
 
-cinemap_brief <- master_data[1:50,]  # This is for development. Remove and substitute master_data later
-# cinemap_brief <- master_data
+# cinemap_brief <- master_data[1:50,]  # This is for development. Remove and substitute master_data later
+cinemap_brief <- master_data
 
 # Do some cleanup
 cinemap_brief[cinemap_brief$release_date == "--",]$release_date = ""
 cinemap_brief[cinemap_brief$production_studio == "--",]$production_studio = ""
 cinemap_brief$production_studio <- gsub("/", "; ", cinemap_brief$production_studio)
+
 
 # Data, multivalue data converted to JSON
 # 
@@ -104,7 +105,10 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
     working_title <- last_title
     
     # Work through the various titles to get a hit.
-    result <- movie_data(cinemap_brief[i,]$film_title_en, cinemap_brief[i,]$year_released)
+    try(
+      result <- movie_data(cinemap_brief[i,]$film_title_en, cinemap_brief[i,]$year_released),
+      next
+    )
     Sys.sleep(sleep_time)
     # if(result$total_results != 1) {
     #   result <- movie_data(cinemap_brief[i,]$film_title_romanji, cinemap_brief[i,]$year_released)
@@ -116,7 +120,7 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
     #   working_title <- cinemap_brief[i,]$film_title_original
     #   Sys.sleep(sleep_time)
     # }
-    print(paste("Working on ", working_title))
+    print(paste("Working on (", i ,")", working_title))
   }
   else {
     repeated_title = TRUE
@@ -190,19 +194,26 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
       cast_and_crew <- movie_credits(api_key = api_key_v3, id = result$results$id)
       Sys.sleep(sleep_time)
     }
-
-    if(cinemap_brief[i,]$tmdb_cast == "") {
-      cinemap_brief[i,]$tmdb_cast <- toJSON2(cast_and_crew$cast)
-    }
-    if(cinemap_brief[i,]$director == "") {
-      cinemap_brief[i,]$director <- toJSON2(cast_and_crew$crew[ which(cast_and_crew$crew$job == "Director"),]$name)
-    }
-    if(cinemap_brief[i,]$producer == "") {
-      cinemap_brief[i,]$producer <- toJSON2(cast_and_crew$crew[ which(cast_and_crew$crew$job == "Producer"),]$name)
-    }
-    if(cinemap_brief[i,]$tmdb_crew == "") {
-      cinemap_brief[i,]$tmdb_crew <- toJSON2(cast_and_crew$crew)
-    }
+    try(
+      if(cinemap_brief[i,]$tmdb_cast == "") {
+        cinemap_brief[i,]$tmdb_cast <- toJSON2(cast_and_crew$cast)
+      }
+    )
+    try(
+      if(cinemap_brief[i,]$director == "") {
+        cinemap_brief[i,]$director <- toJSON2(cast_and_crew$crew[ which(cast_and_crew$crew$job == "Director"),]$name)
+      }
+    )
+    try(
+      if(cinemap_brief[i,]$producer == "") {
+        cinemap_brief[i,]$producer <- toJSON2(cast_and_crew$crew[ which(cast_and_crew$crew$job == "Producer"),]$name)
+      }
+    )
+    try(
+      if(cinemap_brief[i,]$tmdb_crew == "") {
+        cinemap_brief[i,]$tmdb_crew <- toJSON2(cast_and_crew$crew)
+      }
+    )
     
   }
 }
