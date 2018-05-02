@@ -23,7 +23,7 @@ install_packages(c("rvest", "TMDb", "countrycode"))
 
 api_key_v3 <- '90baee00115159ddf9966b23a1d51062'
 
-# master_data <- read.csv('data/master_data.csv', header = TRUE, stringsAsFactors=FALSE)
+master_data <- read.csv('data/master_data.csv', header = TRUE, stringsAsFactors=FALSE)
 # master_data <- read.csv('data/master_data_utf8.csv', header = TRUE, stringsAsFactors=FALSE)
 
 # If you get HTTP error 429 you are making too many requests too quickly. Increasing
@@ -103,23 +103,22 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
     repeated_title = FALSE
     last_title <- cinemap_brief[i,]$film_title_en  # Don't send requests for duplicate titles
     working_title <- last_title
-    
     # Work through the various titles to get a hit.
     try(
       result <- movie_data(cinemap_brief[i,]$film_title_en, cinemap_brief[i,]$year_released),
       next
     )
     Sys.sleep(sleep_time)
-    # if(result$total_results != 1) {
-    #   result <- movie_data(cinemap_brief[i,]$film_title_romanji, cinemap_brief[i,]$year_released)
-    #   working_title <- cinemap_brief[i,]$film_title_romanji
-    #   Sys.sleep(sleep_time)
-    # }
-    # if(result$total_results != 1) {
-    #   result <- movie_data(cinemap_brief[i,]$film_title_original, cinemap_brief[i,]$year_released)
-    #   working_title <- cinemap_brief[i,]$film_title_original
-    #   Sys.sleep(sleep_time)
-    # }
+    if(result$total_results != 1) {
+      result <- movie_data(cinemap_brief[i,]$film_title_romanji, cinemap_brief[i,]$year_released)
+      working_title <- cinemap_brief[i,]$film_title_romanji
+      Sys.sleep(sleep_time)
+    }
+    if(result$total_results != 1) {
+      result <- movie_data(cinemap_brief[i,]$film_title_original, cinemap_brief[i,]$year_released)
+      working_title <- cinemap_brief[i,]$film_title_original
+      Sys.sleep(sleep_time)
+    }
     print(paste("Working on (", i ,")", working_title))
   }
   else {
@@ -204,11 +203,11 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
         cinemap_brief[i,]$director <- toJSON2(cast_and_crew$crew[ which(cast_and_crew$crew$job == "Director"),]$name)
       }
     )
-    try(
+    # try(
       if(cinemap_brief[i,]$producer == "") {
         cinemap_brief[i,]$producer <- toJSON2(cast_and_crew$crew[ which(cast_and_crew$crew$job == "Producer"),]$name)
       }
-    )
+    # )
     try(
       if(cinemap_brief[i,]$tmdb_crew == "") {
         cinemap_brief[i,]$tmdb_crew <- toJSON2(cast_and_crew$crew)
