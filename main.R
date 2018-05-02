@@ -133,9 +133,11 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
     if(cinemap_brief[i,]$film_title_original == "") {
       cinemap_brief[i,]$film_title_original = result$results$original_title
     }
-    if(cinemap_brief[i,]$year_released == "") {
-      cinemap_brief[i,]$year_released = regmatches(result$results$release_date, regexpr("[0-9]{4}", result$results$release_date))
-    }
+    try(
+      if(cinemap_brief[i,]$year_released == "") {
+        cinemap_brief[i,]$year_released = regmatches(result$results$release_date, regexpr("[0-9]{4}", result$results$release_date))
+      }
+    )
     if(cinemap_brief[i,]$release_date == "") {
       cinemap_brief[i,]$release_date = result$results$release_date
     }
