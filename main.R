@@ -1,6 +1,23 @@
+###################
+## Automate package install and load
 
+is_installed <- function(package_name) is.element(package_name, installed.packages()[,1])
 
- 
+# If a package is not installed, install it. Then load the package.
+install_and_load <- function(package_name) {
+  if(!is_installed(package_name)) {
+    install.packages(package_name)
+  }
+  library(package_name, character.only = TRUE)
+}
+
+install_packages <- function(packages) {
+  for(package in packages) {
+    install_and_load(package)
+  }
+}
+
+install_packages(c("rvest", "TMDb", "countrycode"))
 
 api_key_v3 <- '90baee00115159ddf9966b23a1d51062'
 
@@ -45,9 +62,6 @@ cinemap_brief$imdb_id <- ""
 cinemap_brief$tmdb_cast <- ""
 cinemap_brief$producer <- ""
 cinemap_brief$tmdb_crew <- ""
-cinemap_brief$tmdb_scraped <- FALSE
-cinemap_brief$imdb_scraped <- FALSE
-cinemap_brief$imdb_error <- "" 
 
 # Utility functions to DRY up and promote readability
 movie_data <- function(title, year){
@@ -66,11 +80,6 @@ toJSON2 <- function(data) {
   }
 }
 
-language_to_code_2 <- function(language) {
-  return(ISO_639_2[grep(paste("^", language, "$", sep = ""), ISO_639_2$Name, ignore.case = TRUE),]$Alpha_2)
-}
-
-# https://www.imdb.com/find?ref_=nv_sr_fn&q=Equals+2015&s=all
 
 start_time <- Sys.time()
 last_title <- ""
@@ -104,7 +113,6 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
   
   if(result$total_results == 1) {
     # Get the info returned in the basic query
-    cinemap_brief[i,]$tmdb_scraped <- TRUE
     cinemap_brief[i,]$tmdb_id <- result$results$id
     if(cinemap_brief[i,]$film_title_original == "") {
       cinemap_brief[i,]$film_title_original = result$results$original_title
@@ -139,7 +147,7 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
     if(cinemap_brief[i,]$imdb_id == "") {
       cinemap_brief[i,]$imdb_id = details$imdb_id
     }
-    if(cinemap_brief[i,]$budget == "" && details$budget > 0) {
+    if(cinemap_brief[i,]$budget == "") {
       cinemap_brief[i,]$budget = details$budget
     }
     
@@ -169,7 +177,7 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
       cast_and_crew <- movie_credits(api_key = api_key_v3, id = result$results$id)
       Sys.sleep(sleep_time)
     }
-
+    
     if(cinemap_brief[i,]$tmdb_cast == "") {
       cinemap_brief[i,]$tmdb_cast <- toJSON2(cast_and_crew$cast)
     }
@@ -186,9 +194,11 @@ for(i in 1:length(cinemap_brief$film_title_en)) {
   }
 }
 
-# #main > div > div.findSection > table > tbody > tr:nth-child(1) > td.result_text > a
 
 i = 9
+
+cinemap_brief$imdb_error <- ""
+cinemap_brief$imbd_scraped <- ""
 
 # Build the search URL
 base_url <- "https://www.imdb.com" 
@@ -266,19 +276,22 @@ if(typeof(movie_page) != "list")
     }
   }
   
+  if(cinemap_brief[i,]$year_released == "") {
+    director <- html_text(html_node(movie_page, "span[itemprop='director'] span[itemprop='name']"))
+    if(!is.na(director)) {
+      cinemap_brief[i,]$director <- director
+    }
+  }
+  
 }
 movie_page
-
-
-
 end_time <- Sys.time()
 
 
-
+#title-overview-widget > div.plot_summary_wrapper > div.plot_summary > div:nth-child(2) > span > a > span
 print(end_time - start_time)
 
 write.csv(cinemap_brief, file = "data/cinemap.csv")
 
-# #title-overview-widget > div.vital > div.title_block > div > div.titleBar > div.title_wrapper > div > a:nth-child(5) > span
-
+#regmatches(string, regexpr(pattern, string)) 
 
