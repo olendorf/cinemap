@@ -17,7 +17,7 @@ install_packages <- function(packages) {
   }
 }
 
-install_packages(c("rvest", "TMDb", "countrycode"))
+install_packages(c("rvest", "TMDb", "countrycode", "stringr"))
 
 api_key_v3 <- '90baee00115159ddf9966b23a1d51062'
 
@@ -76,7 +76,7 @@ toJSON2 <- function(data) {
   if(length(data) == 0) {
     return("")
   } else {
-    return(toJSON(data))
+    return(toJSON( str_trim(data) ))  # added the string trim to clean up the data a bit
   }
 }
 
@@ -283,15 +283,29 @@ if(typeof(movie_page) != "list")
     }
   }
   
+  # IMDb's pages are a bit messy so swithcing to xpath where needed.
+  if(cinemap_brief[i,]$production_studio == "") {
+    production_studio_path <- html_text(html_nodes(movie_page, xpath = "//h4[text()='Production Co:']/following-sibling::span[contains(@class, 'see-more')]/a/@href"))
+    if(length(production_studio_path > 0)) {
+      temp <- unlist(strsplit(movie_path, "/?", fixed = TRUE))[1]
+      production_studio_url <- paste(base_url, temp, production_studio_path, sep = "/")
+      production_studio_page <- tryCatch(read_html(production_studio_url), error = function(e) {e$message})
+      cinemap_brief[i,]$production_studio <- toJSON2(
+        html_text(html_nodes(
+          production_studio_page, xpath = "//h4[contains(@id, 'production')]/following-sibling::ul[1]/li/a")))
+    }
+  }
+  
 }
 movie_page
 end_time <- Sys.time()
 
 
-#title-overview-widget > div.plot_summary_wrapper > div.plot_summary > div:nth-child(2) > span > a > span
 print(end_time - start_time)
 
 write.csv(cinemap_brief, file = "data/cinemap.csv")
 
 #regmatches(string, regexpr(pattern, string)) 
+
+# div[contains(@class, 'measure-tab')
 
