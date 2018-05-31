@@ -30,7 +30,7 @@ sleep_time <- 0.5
 
 # Seems even with sleep tmdb doesn't like too many hits. The next to variable 
 # insert a long sleep after bunch of cycles.
-rest_interval = 1000 # rest every <N> cycles
+rest_interval <- 1000 # rest every <N> cycles
 rest_time <- 120 # rest for 120 seconds (2 minutes.)
 
 japanese_char_regex <-  "[\u3000-\u303F]|[\u3040-\u309F]|[\u30A0-\u30FF]|[\uFF00-\uFFEF]|[\u4E00-\u9FAF]|[\u2605-\u2606]|[\u2190-\u2195]|\u203B/g"
